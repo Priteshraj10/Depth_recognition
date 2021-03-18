@@ -40,3 +40,27 @@ def match_frames(f1, f2):
                     idx2s.add(m.trainIdx)
                     ret.append((p1, p2))
 
+    assert(len(set(idx1))) == len(idx1)
+    assert(len(set(idx2))) == len(idx2)
+    assert(len(ret)) >= 8
+    ret = np.array(ret)
+    idx1 = np.array(idx1)
+    idx2 = np.array(idx2)
+
+    model, inliners = ransac((ret[:, 0], ret[:, 1]), EssentialMatrixTransform,
+                            min_samples=8,
+                            residual_threshold=RANSAC_RESIDUAL_THRES,
+                            max_trials=RANSAC_MAX_TRIALS)
+    print("Matches: %d -> %d -> %d -> %d" % (len(f1.des), len(matches), len(inliners), sum(inliners)))
+    return idx1[inliners], idx2[inliners], fundamentalToRt(model.params)
+
+
+class Frame(object):
+
+    @property
+    def kps(self):
+        return kps
+    @property
+    def kd(self):
+        return kd
+
