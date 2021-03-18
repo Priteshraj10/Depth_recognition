@@ -115,7 +115,7 @@ class Map(object):
             # <= 4 match point that's old
             old_point = len(p.frames) <= 4 and p.frames[-1].id + 7 < self.max_frame
 
-            # compute reprojection error
+            # compute re projection error
             errs = []
             for f, idx in zip(p.frames, p.idxs):
                 uv = f.kps[idx]
