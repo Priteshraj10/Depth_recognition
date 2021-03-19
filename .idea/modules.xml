@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SLAM.iml" filepath="$PROJECT_DIR$/.idea/SLAM.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Depth_recognition.iml" filepath="$PROJECT_DIR$/.idea/Depth_recognition.iml" />
     </modules>
   </component>
 </project>
