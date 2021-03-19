@@ -5,6 +5,7 @@ import pangolin
 import OpenGL.GL as gl
 import numpy as np
 
+
 class Display2D(object):
     def __init__(self, W, H):
         pygame.init()
