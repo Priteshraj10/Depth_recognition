@@ -180,4 +180,3 @@ class Autodetect(object):
             if disp2d is not None:
                 img = detect.mapp.frame[-1].annotate(frame)
                 disp2d.paint(img)
-

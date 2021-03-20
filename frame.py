@@ -56,11 +56,56 @@ def match_frames(f1, f2):
 
 
 class Frame(object):
+    def __init__(self, mapp, img, K, pose=np.eye(4), tid=None, verts=None):
+        self.K = np.array(K)
+        self.pose = np.array(pose)
+
+        if img is not None:
+            self.h, self.w = img.shape[0:2]
+            if verts is None:
+                self.kpus, self.des = extractfeature(img)
+            else:
+                self.h, self.w = 0, 0
+                self.kpus, self.des, self.pts = None, None, None
+            self.id = tid if tid is not None else mapp.add_frame(self)
+
+    def annotate(self, img):
+        for i1 in range(len(self.kpus)):
+            u1, v1 = int(round(self.kpus[i1][0])), int(round(self.kpus[i1][1]))
+            if self.pts[i1] is not None:
+                if len(self.pts[i1].frames) >= 5:
+                    cv2.circle(img, (u1, v1), color=(0, 255, 0), radius=3)
+                else:
+                    cv2.circle(img, (u1, v1), color=(0, 128, 0), radius=3)
+                pts = []
+                lfid = None
+                for f, idx in zip(self.pts[i1].frames[-9:][::-1], self.pts[i1].idxs[-9][::-1]):
+                    if lfid is not None and lfid-1 != f.id:
+                        break
+                    pts.append(tuple(map(lambda x: int(round(x)), f.kpus[idx])))
+                    lfid = f.id
+
+                if len(pts) >= 2:
+                    cv2.polylines(img, np.array([pts], dtype=np.int32), False, myjet[len(pts)]*255, thickness=1, lineType=16)
+            else:
+                cv2.circle(img, (u1, v1), color=(0, 0, 0), radius=3)
+        return img
 
     @property
-    def kps(self):
-        return kps
+    def Kinv(self):
+        if not hasattr(self, '_Kinv'):
+            self._Kinv = np.linalg.inv(self.K)
+        return self._Kinv
+    
     @property
+    def kps(self):
+        if not hasattr(self, '_kps'):
+            self._kps = normalize(self.Kinv, self.kpus)
+        return self._kps
+
+    @@property
     def kd(self):
-        return kd
+        if not hasattr(self, '_kd'):
+            self._kd = cKDTree(self.kpus)
+        return self._kd
 
