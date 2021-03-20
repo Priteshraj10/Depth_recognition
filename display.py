@@ -62,7 +62,26 @@ class Display3D(object):
                 gl.glColor3f(0.0, 1.0, 0.0)
                 pangolin.DrawCameras(self.state[0][:-1])
 
-            if self.state is not None:
+            if self.state[0].shape[0] >= 1:
+                gl.glColor3f(1.0, 1.0, 0.0)
+                pangolin.DrawCameras(self.state[0][-1:])
 
+            if self.state[1].shape[0] != 0:
+                gl.glPointSize(5)
+                gl.glColor3f(1.0, 0.0, 0.0)
+                pangolin.DrawPoints(self.state[1], self.state[2])
 
+        pangolin.FinishFrame()
 
+    def paint(self, mapp):
+        if self.q is None:
+            return
+
+        poses, pts, colors = [], [], []
+        for f in mapp.frames:
+            poses.append(np.linalg.inv(f.pose))
+
+        for p in mapp.points:
+            pts.append(p.pt)
+            colors.append(p.color)
+        self.q.put((np.array(poses), np.array(pts), np.array(colors)/256.0))
