@@ -18,7 +18,8 @@ from helpers import triangulate, add_ones
 
 np.set_printoptions(suppress=True)
 
-class SLAM(object):
+
+class Autodetect(object):
     def __int__(self, W, H, K):
         # main classes
         self.mapp = Map()
@@ -115,3 +116,17 @@ class SLAM(object):
             new_pts_count += 1
 
         print("Adding:  %d new points, %d search by projection" %(new_pts_count, sbp_pts_count))
+        if frame.id >= 4 and frame.id % 5 == 0:
+            err = self.mapp.optimize()
+            print("Optimize: %f units of error" % err)
+        print("Map:  %d points, %d frames" %(len(self.mapp.points), len(self.mapp.frames)))
+        print("Time:  %.2f ms" %((time.time()-start_time)*1000.0))
+
+    if __name__ == '__main__':
+        if len(sys.argv) < 2:
+            print("%s < video.mp4" % sys.argv[0])
+            exit(-1)
+
+        disp2d, disp3d = None, None
+        if os.getenv("HEADLESS") is None:
+
