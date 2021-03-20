@@ -129,4 +129,55 @@ class Autodetect(object):
 
         disp2d, disp3d = None, None
         if os.getenv("HEADLESS") is None:
+            disp3d = Display3D()
+
+        cap = cv2.VideoCapture(sys.argv[1])
+
+        W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+        CNT = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        F = float(os.getenv("F", 525))
+
+        if os.getenv("SEEK") is not None:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(os.getenv("SEEK")))
+
+
+        if W > 1024:
+            downscale = 1024.0/W
+            F = downscale
+            H = int(H * downscale)
+            W = 1024
+        print("Using camera %d%d with F %f" % (W, H, F))
+
+        # camera intrinsics
+        K = np.array([[F, 0, W//2], [0, F, H//2], [0, 0, 1]])
+        kinv = np.linalg.inv(K)
+
+        if os.getenv("HEADLESS") is None:
+            disp2d = Display2D(W, H)
+        detect = Autodetect(W, H, K)
+
+        gt_pose = None
+        if len(sys.argv) >= 3:
+            get_pose = np.load(sys.argv[2])['pose']
+            gt_pose[:, :3, 3] *= 50
+
+        i = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            frame = cv2.resize(frame, (W, H))
+
+            print("\n *** Frame %d%d ***" % (i, CNT))
+
+            if ret == True:
+                detect.process_frame(frame, None if get_pose is None else np.linalg.inv(gt_pose[i]))
+            else:
+                break
+            if disp3d is not None:
+                disp3d.paint(detect.mapp)
+
+            if disp2d is not None:
+                img = detect.mapp.frame[-1].annotate(frame)
+                disp2d.paint(img)
 
